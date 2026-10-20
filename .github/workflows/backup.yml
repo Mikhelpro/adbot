@@ -1,0 +1,24 @@
+name: nightly-db-backup
+on:
+  schedule: [{ cron: "0 1 * * *" }]   # daily 01:00 UTC
+  workflow_dispatch: {}                # run manually before every update
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install pg_dump 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -sSf -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump and send to Telegram
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          BACKUP_CHAT_ID: ${{ secrets.BACKUP_CHAT_ID }}
+        run: |
+          F="backup-$(date -u +%F-%H%M).dump"
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" -Fc -f "$F"
+          test -s "$F"
+          curl -sf -F chat_id="$BACKUP_CHAT_ID" -F document=@"$F" -F caption="DB backup $F" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
