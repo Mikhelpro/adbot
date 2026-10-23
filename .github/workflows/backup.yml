@@ -4,13 +4,13 @@ on:
   workflow_dispatch: {}                # run manually before every update
 jobs:
   backup:
-    runs-on: ubuntu-latest
+       runs-on: ubuntu-24.04
     steps:
       - name: Install pg_dump 17
         run: |
           sudo install -d /usr/share/postgresql-common/pgdg
           sudo curl -sSf -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/aptnoble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
           sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
       - name: Dump and send to Telegram
         env:
