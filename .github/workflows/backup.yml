@@ -1,17 +1,19 @@
 name: nightly-db-backup
 on:
-  schedule: [{ cron: "0 1 * * *" }]   # daily 01:00 UTC
-  workflow_dispatch: {}                # run manually before every update
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch: {}
 jobs:
   backup:
-       runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Install pg_dump 17
         run: |
           sudo install -d /usr/share/postgresql-common/pgdg
           sudo curl -sSf -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/aptnoble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
       - name: Dump and send to Telegram
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
