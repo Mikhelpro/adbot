@@ -77,6 +77,35 @@ class Setting(Base):
     key: Mapped[str] = mapped_column(String(50), primary_key=True)
     value: Mapped[str] = mapped_column(Text)
 
+class WalletTx(Base):
+    __tablename__ = "wallet_tx"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.tg_id"))
+    amount: Mapped[int] = mapped_column(Integer)            # + deposit, - spend
+    kind: Mapped[str] = mapped_column(String(20))           # deposit | spend
+    status: Mapped[str] = mapped_column(String(20), default="submitted")  # submitted | approved | rejected
+    reference: Mapped[str | None] = mapped_column(String(100), unique=True, nullable=True)
+    screenshot_file_id: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    note: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+class Review(Base):
+    __tablename__ = "reviews"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), unique=True)
+    user_id: Mapped[int] = mapped_column(BigInteger)
+    rating: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text, default="")
+    hidden: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+class Activity(Base):
+    __tablename__ = "activity"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kind: Mapped[str] = mapped_column(String(30))
+    text: Mapped[str] = mapped_column(String(300))
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=now)
+
 SEED = {  # PLACEHOLDERS: edit names/prices
     "TikTok Ads": [("Starter", 3000), ("Growth", 8000)],
     "Meta Ads": [("Starter", 3000), ("Growth", 8000)],
